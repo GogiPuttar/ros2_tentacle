@@ -179,7 +179,7 @@ private:
             RCLCPP_ERROR(this->get_logger(), "Param timer frequency: %f", timer_frequency_);
             RCLCPP_ERROR(this->get_logger(), "Param Baud rate: %d", baud_rate_int_);
             
-            throw std::runtime_error("Missing necessary parameters in diff_params.yaml!");
+            throw std::runtime_error("Missing necessary parameters in comm.yaml!");
         }
         if (timer_frequency_ <= 0.0 ||
             baud_rate_ == LibSerial::BaudRate::BAUD_INVALID 
