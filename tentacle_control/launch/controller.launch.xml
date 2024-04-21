@@ -5,8 +5,8 @@
      description=".yaml file to configure the comms"/>
   
     <!-- Communicates with the Arduino -->
-    <node pkg="metafly_control" exec="controller" name="controller">
-      <param from="$(find-pkg-share metafly_control)/config/$(var comm_config)"/>
+    <node pkg="tentacle_control" exec="controller" name="controller">
+      <param from="$(find-pkg-share tentacle_control)/config/$(var comm_config)"/>
     </node>
   
   </launch>

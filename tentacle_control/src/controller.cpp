@@ -4,7 +4,7 @@
 #include "std_msgs/msg/float32_multi_array.hpp"
 #include "std_msgs/msg/string.hpp"
 #include "std_msgs/msg/u_int64.hpp"
-#include "metafly_interfaces/msg/controls.hpp"
+#include "tentacle_interfaces/msg/actuation.hpp"
 #include <vector>
 #include <chrono> // Include chrono header for chrono literals
 
@@ -63,10 +63,17 @@ public:
             throw;
         }
 
+        // Initialize actuation
+        // Initialize actuator names
+        for(int i = 1; i <= actuator_count_; i++)
+        {
+            states_.push_back(false);
+        }
+
         // Subscribers
-        cmd_controls_subscriber_ = create_subscription<metafly_interfaces::msg::Controls>(
-        "/cmd_controls", 10, std::bind(
-            &controller::cmd_controls_callback, this,
+        cmd_actuation_subscriber_ = create_subscription<tentacle_interfaces::msg::Actuation>(
+        "/cmd_actuation", 10, std::bind(
+            &controller::cmd_actuation_callback, this,
             std::placeholders::_1));
 
         // Create timer to periodically send control commands
@@ -80,19 +87,29 @@ private:
 
     SerialPort serial_port_;
     rclcpp::TimerBase::SharedPtr timer_;
-    char speed_ = 0;     // Speed value (0-100)
-    char steering_ = 0;  // Steering value (-100 to 100)
-
-    rclcpp::Subscription<metafly_interfaces::msg::Controls>::SharedPtr cmd_controls_subscriber_;
+    int actuator_count_ = 3;
+    std::vector<bool> states_;
+ 
+    rclcpp::Subscription<tentacle_interfaces::msg::Actuation>::SharedPtr cmd_actuation_subscriber_;
 
     void sendArduinoCommands()
     {
         // WRITE
 
-        // Create Float32MultiArray message
+        // Create character array message
         std::vector<char> msg;
-        msg.push_back(speed_);    // Add speed value (0-100)
-        msg.push_back(steering_); // Add steering value (-100 to 100)
+
+        for(int i = 1; i <= actuator_count_;  i++)
+        {
+            if (states_.at(i-1))
+            {
+                msg.push_back(1);
+            }
+            else
+            {
+                msg.push_back(0);
+            }
+        }
 
         // Send data over serial
         std::vector<char> bytes_written(msg.size() * sizeof(char));
@@ -115,14 +132,11 @@ private:
 
             char reading = 0;      // variable to store the read result
 
-            serial_port_.ReadByte( reading, timeout_ms );
-            response.push_back(reading);
-            serial_port_.ReadByte( reading, timeout_ms );
-            response.push_back(reading);
-            serial_port_.ReadByte( reading, timeout_ms );
-            response.push_back(reading);
-            serial_port_.ReadByte( reading, timeout_ms );
-            response.push_back(reading);
+            for (int i = 1; i<= actuator_count_ + 2; i++)
+            {
+                serial_port_.ReadByte( reading, timeout_ms );
+                response.push_back(reading);
+            }
 
             // RCLCPP_INFO(this->get_logger(), "UNGA BUNGA: %d", reading);
         } 
@@ -133,7 +147,9 @@ private:
 
         if (response.size() == 4 && response.at(0) == '!') 
         {
-            RCLCPP_INFO(this->get_logger(), "Received confirmation: %c, %d, %d", response.at(0), response.at(1), response.at(2));
+            RCLCPP_INFO(this->get_logger(), "Received confirmation: %c, %d, %d, %d", response.at(0), response.at(1), response.at(2), response.at(3)); // 3 actuators
+            // RCLCPP_INFO(this->get_logger(), "Received confirmation: %c, %d, %d, %d, %d, %d, %d", response.at(0), response.at(1), response.at(2), response.at(3), response.at(4), response.at(5), response.at(6)); // 6 actuators
+            // RCLCPP_INFO(this->get_logger(), "Received confirmation: %c, %d, %d, %d, %d, %d, %d, %d, %d, %d", response.at(0), response.at(1), response.at(2), response.at(3), response.at(4), response.at(5), response.at(6), response.at(7), response.at(8), response.at(9)); // 9 actuators
         } 
         else 
         {
@@ -141,11 +157,17 @@ private:
         }
     }
 
-    /// \brief cmd_controls topic callback
-    void cmd_controls_callback(const metafly_interfaces::msg::Controls & msg)
+    /// \brief cmd_actuation topic callback
+    void cmd_actuation_callback(const tentacle_interfaces::msg::Actuation& msg)
     {
-        speed_ = msg.speed;
-        steering_ = msg.steering;
+        // speed_ = msg.speed;
+        // steering_ = msg.steering;
+        // int temp = 0;
+
+        for (int i = 1; i <= actuator_count_; i++)
+        {
+            states_.at(i-1) = msg.states[i-1];
+        }
     }
 
     void check_yaml_params()
@@ -166,7 +188,7 @@ private:
             RCLCPP_ERROR(this->get_logger(), "Param timer frequency: %f", timer_frequency_);
             RCLCPP_ERROR(this->get_logger(), "Param Baud rate: %d", baud_rate_int_);
             
-            throw std::runtime_error("Incorrect params in diff_params.yaml!");
+            throw std::runtime_error("Incorrect params in comm.yaml!");
         }
     }
 

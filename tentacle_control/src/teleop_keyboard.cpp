@@ -5,7 +5,7 @@
 #include <ncurses.h>
 #include <unistd.h>
 #include <iostream>
-#include "metafly_interfaces/msg/controls.hpp"
+#include "tentacle_interfaces/msg/controls.hpp"
 #include <limits.h>
 
 using namespace std::chrono_literals;
@@ -35,7 +35,7 @@ public:
         timer_ = create_wall_timer(1ms, std::bind(&teleop_keyboard::checkKeyboardInput, this));
 
         // Publishers
-        cmd_controls_publisher_ = create_publisher<metafly_interfaces::msg::Controls>(
+        cmd_controls_publisher_ = create_publisher<tentacle_interfaces::msg::Controls>(
         "/cmd_controls", 10);
     }
 
@@ -51,7 +51,7 @@ private:
     char max_steering_;
     rclcpp::TimerBase::SharedPtr timer_;
 
-    rclcpp::Publisher<metafly_interfaces::msg::Controls>::SharedPtr cmd_controls_publisher_;
+    rclcpp::Publisher<tentacle_interfaces::msg::Controls>::SharedPtr cmd_controls_publisher_;
 
     void checkKeyboardInput() {
 
@@ -87,7 +87,7 @@ private:
             printf("Speed: %d, Steering: %d\n", speed_, steering_);
         }
 
-        metafly_interfaces::msg::Controls msg;
+        tentacle_interfaces::msg::Controls msg;
 
         msg.speed = speed_;
         msg.steering = steering_;
