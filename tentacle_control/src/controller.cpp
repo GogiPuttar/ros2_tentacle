@@ -99,9 +99,9 @@ private:
         // Create character array message
         std::vector<char> msg;
 
-        for(int i = 1; i <= actuator_count_;  i++)
+        for(int i = 0; i < actuator_count_;  i++)
         {
-            if (states_.at(i-1))
+            if (states_.at(i))
             {
                 msg.push_back(1);
             }
@@ -118,7 +118,8 @@ private:
         serial_port_.Write(data_string);
 
         // Debug output
-        // RCLCPP_INFO(this->get_logger(), "Sent control commands: Speed=%.2f, Steering=%.2f", speed_, steering_);
+        // RCLCPP_INFO(this->get_logger(), "Sent control commands: Ac1=%d, Ac2=%d, Av=%d", msg.at(0), msg.at(1), msg.at(2));
+        // RCLCPP_INFO(this->get_logger(), "Sent control commands: %c, %c, %c", data_string.at(0), data_string.at(1), data_string.at(2));
 
         // READ
 
@@ -132,7 +133,7 @@ private:
 
             char reading = 0;      // variable to store the read result
 
-            for (int i = 1; i<= actuator_count_ + 2; i++)
+            for (int i = 1; i <= actuator_count_ + 2; i++)
             {
                 serial_port_.ReadByte( reading, timeout_ms );
                 response.push_back(reading);
@@ -145,7 +146,7 @@ private:
             RCLCPP_DEBUG(this->get_logger(), "Exception occurred while reading from serial port: %s", e.what());
         }
 
-        if (response.size() == 4 && response.at(0) == '!') 
+        if ((response.size() == static_cast<size_t>(actuator_count_ + 2)) && (response.at(0) == '!')) 
         {
             RCLCPP_INFO(this->get_logger(), "Received confirmation: %c, %d, %d, %d", response.at(0), response.at(1), response.at(2), response.at(3)); // 3 actuators
             // RCLCPP_INFO(this->get_logger(), "Received confirmation: %c, %d, %d, %d, %d, %d, %d", response.at(0), response.at(1), response.at(2), response.at(3), response.at(4), response.at(5), response.at(6)); // 6 actuators

@@ -162,7 +162,7 @@ private:
                 // Reset after publishing
                 msg = initialize_actuation_msg();
 
-                RCLCPP_INFO(this->get_logger(), "Joystick message published: time: %d, val: %d, type: %d, number: %d", js.time, js.value, js.type, js.number);
+                // RCLCPP_INFO(this->get_logger(), "Joystick message published: time: %d, val: %d, type: %d, number: %d", js.time, js.value, js.type, js.number);
             }
             else
             {
