@@ -42,6 +42,14 @@ void loop() {
         // Trigger LED_BUILTIN
         digitalWrite(LED_BUILTIN, HIGH);
       }
+      else
+      {
+        // Turn actuator ON
+        digitalWrite(actuatorPins[i], LOW);
+
+        // Trigger LED_BUILTIN
+        digitalWrite(LED_BUILTIN, LOW);
+      }
     }
 
     // Relay the data back through serial
