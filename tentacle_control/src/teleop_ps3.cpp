@@ -25,7 +25,7 @@ public:
 
 private:
 
-    int actuator_count_ = 3;
+    int actuator_count_ = 6;
     std::vector<std::string> actuators_;
     bool safe_;
 
@@ -88,11 +88,12 @@ private:
             {
                 // Handle joystick axes
                 if (js.number <= 4) 
-                {
+                {   /// 0&1 for left joyst
                     if (js.number == 0 || js.number == 1)
                     {
                         js_vals[js.number] = static_cast<float>(js.value) / 32767.0;
                     }
+                    /// 3&4 for right joyst
                     else if (js.number == 3 || js.number == 4)
                     {
                         js_vals[js.number-1] = static_cast<float>(js.value) / 32767.0;
@@ -132,31 +133,78 @@ private:
                 if(js_vals[1] < -up_thresh)
                 {
                     msg.states[0] = true;
+                    RCLCPP_INFO(this->get_logger(), "upper trigger of left one!");
                 }
                 else if((js_vals[1] <= 0) && (js_vals[1] > -up_thresh) && js_vals[0] < -side_thresh) // Check if left joystick is top-left
                 {
                     msg.states[0] = true;
                     msg.states[1] = true;
+                    RCLCPP_INFO(this->get_logger(), " left TOP LEFT!");
                 }
                 else if((js_vals[1] <= 0) && (js_vals[1] > -up_thresh) && js_vals[0] > side_thresh) // Check if left joystick is top-right
                 {
                     msg.states[0] = true;
                     msg.states[2] = true;
+
+                    RCLCPP_INFO(this->get_logger(), " left TOP RIGHT!");
                 }
                 else if((js_vals[1] > 0) && (js_vals[1] < up_thresh) && js_vals[0] < -side_thresh) // Check if left joystick is bottom-left
                 {
                     msg.states[1] = true;
+                    RCLCPP_INFO(this->get_logger(), " left BOTTOM LEFT!");
                 }
                 else if((js_vals[1] > 0) && (js_vals[1] < up_thresh) && js_vals[0] > side_thresh) // Check if left joystick is bottom-right
                 {
                     msg.states[2] = true;
+                    RCLCPP_INFO(this->get_logger(), " left BOTTOM RIGHT!");
                 }
                 else if(js_vals[1] > up_thresh) // Check if left joystick is down
                 {
                     msg.states[1] = true;
                     msg.states[2] = true;
+                    RCLCPP_INFO(this->get_logger(), "left DOWN!");
                 }
                 
+
+
+                // Check if right Joystick is up
+                if(js_vals[3] < -up_thresh)
+                {
+                    msg.states[3] = true;
+                    RCLCPP_INFO(this->get_logger(), " right TOP!");
+
+                }
+                else if((js_vals[3] <= 0) && (js_vals[3] > -up_thresh) && js_vals[2] < -side_thresh) // Check if right joystick is top-left
+                {
+                    msg.states[3] = true;
+                    msg.states[4] = true;
+                    RCLCPP_INFO(this->get_logger(), " right TOP LEFT!");
+                }
+                else if((js_vals[3] <= 0) && (js_vals[3] > -up_thresh) && js_vals[2] > side_thresh) // Check if right joystick is top-righ
+                {
+                    msg.states[3] = true;
+                    msg.states[5] = true;
+                    RCLCPP_INFO(this->get_logger(), " right TOP RIGHT!");
+                }
+                else if((js_vals[3] > 0) && (js_vals[3] < up_thresh) && js_vals[2] < -side_thresh) // Check if right joystick is bottom-left
+                {
+                    msg.states[4] = true;
+                    RCLCPP_INFO(this->get_logger(), " right BOTTOM LEFT!");
+                }   
+                else if((js_vals[3] > 0) && (js_vals[3] < up_thresh) && js_vals[2] > side_thresh) // Check if right joystick is bottom-right
+                {
+                    msg.states[5] = true;
+                    RCLCPP_INFO(this->get_logger(), " right BOTTOM RIGHT!");
+                }
+                else if(js_vals[3] > up_thresh) // Check if right joystick is down
+                {
+                    msg.states[4] = true;
+                    msg.states[5] = true;
+                    RCLCPP_INFO(this->get_logger(), "right DOWN!");
+                }
+
+
+
                 cmd_actuation_publisher_->publish(msg);
 
                 // Reset after publishing
@@ -186,6 +234,7 @@ private:
         {
             msg.names.push_back(actuators_.at(i-1));
             msg.states.push_back(false);
+            // RCLCPP_INFO(this->get_logger(), "msg.states print out: %ld" , msg.states.size());
         }
 
         return msg;

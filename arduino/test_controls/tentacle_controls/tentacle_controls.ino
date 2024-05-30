@@ -4,7 +4,7 @@
 const int actuatorPins[] = {2, 3, 4, 5, 6, 7, 8, 9, 10};
 
 // Parametrize the number of actuators
-const int num_actuators_used = 3;
+const int num_actuators_used = 6;
 
 void setup() {
   Serial.begin(115200);

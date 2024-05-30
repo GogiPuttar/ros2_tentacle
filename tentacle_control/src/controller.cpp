@@ -87,7 +87,7 @@ private:
 
     SerialPort serial_port_;
     rclcpp::TimerBase::SharedPtr timer_;
-    int actuator_count_ = 3;
+    int actuator_count_ = 6;
     std::vector<bool> states_;
  
     rclcpp::Subscription<tentacle_interfaces::msg::Actuation>::SharedPtr cmd_actuation_subscriber_;
@@ -147,9 +147,9 @@ private:
         }
 
         if ((response.size() == static_cast<size_t>(actuator_count_ + 2)) && (response.at(0) == '!')) 
-        {
-            RCLCPP_INFO(this->get_logger(), "Received confirmation: %c, %d, %d, %d", response.at(0), response.at(1), response.at(2), response.at(3)); // 3 actuators
-            // RCLCPP_INFO(this->get_logger(), "Received confirmation: %c, %d, %d, %d, %d, %d, %d", response.at(0), response.at(1), response.at(2), response.at(3), response.at(4), response.at(5), response.at(6)); // 6 actuators
+        {   
+            // RCLCPP_INFO(this->get_logger(), "Received confirmation: %c, %d, %d, %d", response.at(0), response.at(1), response.at(2), response.at(3)); // 3 actuators
+            RCLCPP_INFO(this->get_logger(), "Received confirmation: %c, %d, %d, %d, %d, %d, %d", response.at(0), response.at(1), response.at(2), response.at(3), response.at(4), response.at(5), response.at(6)); // 6 actuators
             // RCLCPP_INFO(this->get_logger(), "Received confirmation: %c, %d, %d, %d, %d, %d, %d, %d, %d, %d", response.at(0), response.at(1), response.at(2), response.at(3), response.at(4), response.at(5), response.at(6), response.at(7), response.at(8), response.at(9)); // 9 actuators
         } 
         else 
